@@ -59,9 +59,6 @@ uint8_t *ConfigurationPacket::serialize(ConfigurationPacket &packet, uint16_t &n
     std::copy(packet.targetPort.begin(), packet.targetPort.end(), std::back_inserter(byteBuffer));
     byteBuffer.push_back('\0');
 
-    byteBuffer.insert(byteBuffer.end(), packet.targetPort.begin(), packet.targetPort.end());
-    byteBuffer.push_back('\0');
-
     byteBuffer.push_back(packet.fps);
     byteBuffer.push_back(packet.quality);
 

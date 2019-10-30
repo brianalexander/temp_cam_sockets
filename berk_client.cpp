@@ -1,5 +1,6 @@
 /*
  * client.c -- a stream socket client demo
+ * g++ berk_client.cpp -o berkcli -lpthread `pkg-config --cflags --libs opencv`
  */
 
 #include <chrono>

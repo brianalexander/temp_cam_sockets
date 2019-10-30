@@ -2,11 +2,11 @@
     "connPort": "12345",
     "devices": {
       "camera1": {
-        "device": "rtmp://fms.105.net:1935/live/rmc1",
-        "fps": 30,
-        "quality": 50,
-        "resolutionX": 1920,
-        "resolutionY": 1080,
+        "device": "0",
+        "fps": 15,
+        "quality": 30,
+        "resolutionX": 640,
+        "resolutionY": 480,
         "targetPort": "23456",
         "paused": false
       },
