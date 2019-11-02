@@ -108,7 +108,6 @@ void videoStreamListener(char const *port)
         {
             recv_bytes = recvfrom(udpSock, buffer, buflen, 0, NULL, NULL);
             bytesPerSecond += recv_bytes;
-
         } while (recv_bytes > sizeof(int));
 
         // treat tempBuf as an int array and get the first element
