@@ -37,10 +37,13 @@
 std::set<int> socketFds;
 std::map<int, std::thread> socketToThreadMap;
 
+std::map<std::string, int> idToSocketMap;
+std::vector<std::thread> videoStreamListeners(4);
+
 nlohmann::json configJSON;
 
 void tcpConnectionListener(char const *port);
-void videoStreamListener(char const *port);
+void videoStreamListener(std::string port, int id);
 
 void sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint16_t numPacks);
 void sendHeartbeat();
@@ -53,6 +56,10 @@ int main(void)
     i >> configJSON;
     // close file stream
     i.close();
+
+    for(int i = 0, port = 23456; i < videoStreamListeners.size(); port++, i++) {
+        videoStreamListeners[i] = std::thread(videoStreamListener, std::to_string(port), i);
+    }
 
     std::thread tcpConnectionListenerThread(tcpConnectionListener,
                                             configJSON["connPort"].get<std::string>().c_str());
@@ -80,7 +87,85 @@ void sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint16_t numP
     }
 }
 
-void videoStreamListener(char const *port)
+void tcpConnectionListener(char const *port)
+{
+    int sockfd, new_fd; // listen on sock_fd, new connection on new_fd
+    int recv_bytes;
+    char s[INET6_ADDRSTRLEN];
+    struct sockaddr_storage their_addr; // connector's address information
+    socklen_t sin_size;
+
+    ConnectionPacket connPack;
+
+    sockfd = bindTcpSocketFd(port);
+    printf("server: waiting for connections...\n");
+
+    for (;;)
+    { // main accept() loop
+        sin_size = sizeof their_addr;
+        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+        if (new_fd == -1)
+        {
+            perror("accept");
+            continue;
+        }
+
+        inet_ntop(their_addr.ss_family,
+                  get_in_addr((struct sockaddr *)&their_addr),
+                  s, sizeof s);
+        printf("server: got connection from %s\n", s);
+
+        // Verify their information in the config file
+        recv_bytes = recv(new_fd, &connPack, CONN_PACK_SIZE, 0);
+
+        if (recv_bytes == CONN_PACK_SIZE)
+        {
+            std::cout << connPack.cameraId << " has connected." << std::endl;
+            ConfigurationPacket defaultConfigPacket = {
+                configJSON["devices"][connPack.cameraId]["device"].get<std::string>(),
+                configJSON["devices"][connPack.cameraId]["targetPort"].get<std::string>(),
+                configJSON["devices"][connPack.cameraId]["fps"].get<uint8_t>(),
+                configJSON["devices"][connPack.cameraId]["quality"].get<uint8_t>(),
+                configJSON["devices"][connPack.cameraId]["resolutionX"].get<uint16_t>(),
+                configJSON["devices"][connPack.cameraId]["resolutionY"].get<uint16_t>(),
+            };
+
+            idToSocketMap[std::string(connPack.cameraId)] =  new_fd;
+
+            uint16_t numPacks;
+            uint8_t *serializedConfigPack = ConfigurationPacket::serialize(defaultConfigPacket, numPacks);
+
+            sendConfiguration(new_fd, serializedConfigPack, numPacks);
+
+            delete serializedConfigPack;
+        }
+    }
+}
+
+void sendHeartbeat()
+{
+    for (;;)
+    {
+        if (!idToSocketMap.empty())
+        {
+            for (auto it = std::begin(idToSocketMap); it != std::end(idToSocketMap); ++it)
+            {
+                printf("Sending messages to %s.\n", it->first.c_str());
+                int result = send(it->second, "Hello, world!", 13, MSG_NOSIGNAL); //MSG_NOSIGNAL
+                if (result == -1 || result == 0)
+                {
+                    perror("send");
+                    printf("Camera %s has disconnected", it->first.c_str());
+                    idToSocketMap.erase(it->first);
+                }
+            }
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+}
+
+void videoStreamListener(std::string port, int id)
 {
     int udpSock;
     int duration = 0;
@@ -92,7 +177,8 @@ void videoStreamListener(char const *port)
     const int buflen = 200000;
     unsigned char *buffer = new unsigned char[buflen];
 
-    udpSock = bindUdpSocketFd(port);
+    udpSock = bindUdpSocketFd(port.c_str());
+    std::cout << "Listening for video on UDP port " << port << std::endl;
 
     while (true)
     {
@@ -140,96 +226,11 @@ void videoStreamListener(char const *port)
         duration += std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
         if (duration >= 1000)
         {
-            std::cout << "bytes per second: " << (double)bytesPerSecond / 1000.0 / 1000.0 << "mB/s" << std::endl;
+            // std::cout << "bytes per second: " << (double)bytesPerSecond / 1000.0 / 1000.0 << "mB/s" << std::endl;
             duration = 0;
             bytesPerSecond = 0;
         }
     }
 
     delete buffer;
-}
-
-void tcpConnectionListener(char const *port)
-{
-    int sockfd, new_fd; // listen on sock_fd, new connection on new_fd
-    int recv_bytes;
-    char s[INET6_ADDRSTRLEN];
-    struct sockaddr_storage their_addr; // connector's address information
-    socklen_t sin_size;
-
-    ConnectionPacket connPack;
-
-    sockfd = bindTcpSocketFd(port);
-    printf("server: waiting for connections...\n");
-
-    for (;;)
-    { // main accept() loop
-        sin_size = sizeof their_addr;
-        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-        if (new_fd == -1)
-        {
-            perror("accept");
-            continue;
-        }
-
-        inet_ntop(their_addr.ss_family,
-                  get_in_addr((struct sockaddr *)&their_addr),
-                  s, sizeof s);
-        printf("server: got connection from %s\n", s);
-
-        // Verify their information in the config file
-        recv_bytes = recv(new_fd, &connPack, CONN_PACK_SIZE, 0);
-
-        if (recv_bytes == CONN_PACK_SIZE)
-        {
-            std::cout << connPack.cameraId << " has connected." << std::endl;
-            ConfigurationPacket defaultConfigPacket = {
-                configJSON["devices"][connPack.cameraId]["device"].get<std::string>(),
-                configJSON["devices"][connPack.cameraId]["targetPort"].get<std::string>(),
-                configJSON["devices"][connPack.cameraId]["fps"].get<uint8_t>(),
-                configJSON["devices"][connPack.cameraId]["quality"].get<uint8_t>(),
-                configJSON["devices"][connPack.cameraId]["resolutionX"].get<uint16_t>(),
-                configJSON["devices"][connPack.cameraId]["resolutionY"].get<uint16_t>(),
-            };
-
-            socketFds.insert(new_fd);
-            printf("starting udp listener on %s\n", defaultConfigPacket.targetPort.c_str());
-            socketToThreadMap.insert({new_fd, std::thread(videoStreamListener, defaultConfigPacket.targetPort.c_str())});
-
-            uint16_t numPacks;
-            uint8_t *serializedConfigPack = ConfigurationPacket::serialize(defaultConfigPacket, numPacks);
-
-            sendConfiguration(new_fd, serializedConfigPack, numPacks);
-
-            delete serializedConfigPack;
-        }
-    }
-}
-
-void sendHeartbeat()
-{
-    for (;;)
-    {
-        if (!socketFds.empty())
-        {
-            for (auto it = std::begin(socketFds); it != std::end(socketFds); ++it)
-            {
-                printf("Sending messages to %d.\n", *it);
-                int result = send(*it, "Hello, world!", 13, MSG_NOSIGNAL); //MSG_NOSIGNAL
-                if (result == -1)
-                {
-                    perror("send");
-                    socketFds.erase(socketFds.find(*it));
-                }
-            }
-        }
-
-        for (auto it = std::begin(socketFds); it != std::end(socketFds); ++it)
-        {
-            printf("%d ", *it);
-            printf("\n");
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
 }

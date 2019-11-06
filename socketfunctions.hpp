@@ -218,7 +218,7 @@ int connectTcpSocketFd(char const *host = nullptr, char const *port = nullptr)
     if ((rv = getaddrinfo(host, port, &hints, &server_list)) != 0)
     {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
+        return -1;
     }
 
     // loop through all the results and connect to the first we can
@@ -244,7 +244,7 @@ int connectTcpSocketFd(char const *host = nullptr, char const *port = nullptr)
     if (server_candidate == NULL)
     {
         fprintf(stderr, "client: failed to connect\n");
-        return 2;
+        return -1;
     }
 
     inet_ntop(server_candidate->ai_family, get_in_addr((struct sockaddr *)server_candidate->ai_addr),
