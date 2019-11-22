@@ -23,7 +23,7 @@
 // OpenCV
 #include "opencv2/opencv.hpp"
 
-#include "uicamera.h"
+#include "mainwindow.h"
 #include "onecamera.h"
 
 #include <QThread>
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     portListener1.setId(1);
     portListener1.start();
 
-    UiCamera ui;
+    MainWindow ui;
     oneCamera* cameraOne = ui.findChild<oneCamera*>("cameraOne");
     QObject::connect(&portListener1, &VideoListenerThread::frameCompleted, cameraOne, &oneCamera::drawFrame);
 

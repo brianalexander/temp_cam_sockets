@@ -1,16 +1,16 @@
-#include "uicamera.h"
+#include "mainwindow.h"
 #include "ui_uicamera.h"
 
-UiCamera::UiCamera(QWidget *parent)
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::UiCamera)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
 //    QObject::connect()
 }
 
-UiCamera::~UiCamera()
+MainWindow::~MainWindow()
 {
     delete ui;
 }

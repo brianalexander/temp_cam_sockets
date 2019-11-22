@@ -17,27 +17,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
+    mainwindow.cpp \
     onecamera.cpp \
     ../packetdefinitions.cpp \
     ../socketfunctions.cpp \
     tcplistenerthread.cpp \
     videolistenerthread.cpp \
-    uicamera.cpp \
 
 
 HEADERS += \
     json.hpp \
     ../packetdefinitions.hpp \
     ../socketfunctions.hpp \
+    mainwindow.h \
     onecamera.h \
     tcplistenerthread.h \
     videolistenerthread.h \
-    uicamera.h \
 
 
 FORMS += \
-    onecamera.ui \
-    uicamera.ui
+    mainwindow.ui \
+    onecamera.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
