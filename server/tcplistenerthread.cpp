@@ -15,18 +15,6 @@
 
 void TcpListenerThread::run()
 {
-    // Get handle for config file
-    QFile jsonFile("/home/alexanderb/Downloads/temp_cam_sockets/config.json");
-    // Read data into json object
-    jsonFile.open(QFile::ReadOnly);
-    // close file stream
-    QJsonDocument jsonResponse = QJsonDocument::fromJson(jsonFile.readAll());
-    QJsonObject configObject = jsonResponse.object();
-    QJsonObject configJSON = configObject["devices"].toObject()["camera1"].toObject();
-
-    qDebug() << configJSON["fps"].toInt();
-
-
     int sockfd, new_fd; // listen on sock_fd, new connection on new_fd
     int recv_bytes;
     char s[INET6_ADDRSTRLEN];
@@ -64,42 +52,50 @@ void TcpListenerThread::run()
         if (recv_bytes == CONN_PACK_SIZE)
         {
             qDebug() << connPack.cameraId << " has connected.";
-            ConfigurationPacket defaultConfigPacket = {
-                configJSON["device"].toString().toStdString(),
-                configJSON["targetPort"].toString().toStdString(),
-                configJSON["fps"].toInt(),
-                configJSON["quality"].toInt(),
-                configJSON["resolutionX"].toInt(),
-                configJSON["resolutionY"].toInt(),
-            };
+            connectedDevices[QString(connPack.cameraId)] = new_fd;
             emit deviceConnected(QString(connPack.cameraId), new_fd);
-//            idToSocketMap[std::string(connPack.cameraId)] = new_fd;
-
-            uint8_t numPacks;
-            uint8_t *serializedConfigPack = ConfigurationPacket::serialize(defaultConfigPacket, numPacks);
-
-            sendConfiguration(new_fd, serializedConfigPack, numPacks);
-
-            delete serializedConfigPack;
         }
     }
 }
 
-void TcpListenerThread::sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint8_t numPacks)
+void TcpListenerThread::sendConfiguration(const QString& cameraId)
 {
+    // Get handle for config file
+    QFile jsonFile("/home/alexanderb/Downloads/temp_cam_sockets/config.json");
+    // Read data into json object
+    jsonFile.open(QFile::ReadOnly);
+    // close file stream
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(jsonFile.readAll());
+    QJsonObject configObject = jsonResponse.object();
+    QJsonObject configJSON = configObject["devices"].toObject()[cameraId].toObject();
+
+    ConfigurationPacket defaultConfigPacket = {
+        configJSON["device"].toString().toStdString(),
+        configJSON["targetPort"].toString().toStdString(),
+        configJSON["fps"].toInt(),
+        configJSON["quality"].toInt(),
+        configJSON["resolutionX"].toInt(),
+        configJSON["resolutionY"].toInt(),
+    };
+
+    uint8_t numPacks;
+    uint8_t *serializedConfigPack = ConfigurationPacket::serialize(defaultConfigPacket, numPacks);
+
     int result;
     qDebug() << "sending configuration...";
     qDebug() << sizeof(numPacks);
-    result = send(socketFd, &numPacks, sizeof(numPacks), MSG_NOSIGNAL);
+    result = send(connectedDevices[cameraId], &numPacks, sizeof(numPacks), MSG_NOSIGNAL);
     if (result == -1)
     {
         perror("send");
     }
 
     printf("%hhu\n", numPacks);
-    result = send(socketFd, configurationBuffer, numPacks, MSG_NOSIGNAL);
+    result = send(connectedDevices[cameraId], serializedConfigPack, numPacks, MSG_NOSIGNAL);
     if (result == -1)
     {
         perror("send");
     }
+
+    delete serializedConfigPack;
 }

@@ -19,8 +19,10 @@ public:
     void setId(int id) {
         m_id = id;
     }
-    void sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint8_t numPacks);
-    void sendHeartbeat();
+
+public slots:
+    void sendConfiguration(const QString& cameraId);
+//    void sendHeartbeat();
 
 signals:
     void deviceConnected(QString cameraId, int socketFd);

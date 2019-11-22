@@ -6,6 +6,7 @@
 
 #include <QThread>
 #include <QApplication>
+#include <QComboBox>
 
 // Thread Objects
 #include "videolistenerthread.h"
@@ -35,8 +36,12 @@ int main(int argc, char *argv[])
     oneCamera* cameraThree = mainWindow.findChild<oneCamera*>("cameraThree");
     oneCamera* cameraFour = mainWindow.findChild<oneCamera*>("cameraFour");
 
+    QComboBox* singleCameraComboBox = mainWindow.findChild<QComboBox*>("singleCameraCB");
+    QComboBox* configurationComboBox = mainWindow.findChild<QComboBox*>("configurationCB");
+
     QObject::connect(&portListener1, &VideoListenerThread::frameCompleted, cameraOne, &oneCamera::drawFrame);
     QObject::connect(&tcpListener, &TcpListenerThread::deviceConnected, &mainWindow, &MainWindow::addDevice);
+    QObject::connect(singleCameraComboBox, QOverload<const QString&>::of(&QComboBox::activated), &tcpListener, &TcpListenerThread::sendConfiguration);
     mainWindow.show();
     return a.exec();
 }
