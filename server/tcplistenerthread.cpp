@@ -55,6 +55,11 @@ void TcpListenerThread::run()
 
         // Verify their information in the config file
         recv_bytes = recv(new_fd, &connPack, CONN_PACK_SIZE, 0);
+        if(recv_bytes == -1 || recv_bytes == 0) {
+            perror("recv");
+            close(new_fd);
+            continue;
+        }
 
         if (recv_bytes == CONN_PACK_SIZE)
         {
@@ -83,8 +88,8 @@ void TcpListenerThread::run()
 void TcpListenerThread::sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint8_t numPacks)
 {
     int result;
-    std::cout << "sending configuration..." << std::endl;
-    std::cout << sizeof(numPacks) << std::endl;
+    qDebug() << "sending configuration...";
+    qDebug() << sizeof(numPacks);
     result = send(socketFd, &numPacks, sizeof(numPacks), MSG_NOSIGNAL);
     if (result == -1)
     {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1151</width>
+    <height>618</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,7 +29,7 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -46,83 +46,52 @@
      <number>0</number>
     </property>
     <item>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <property name="spacing">
-       <number>0</number>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
       </property>
-      <item row="1" column="1" alignment="Qt::AlignHCenter">
-       <widget class="oneCamera" name="cameraTwo" native="true"/>
+      <item>
+       <widget class="QComboBox" name="singleCameraCB">
+        <item>
+         <property name="text">
+          <string>Select Camera...</string>
+         </property>
+        </item>
+       </widget>
       </item>
-      <item row="2" column="0" alignment="Qt::AlignHCenter">
+      <item>
+       <widget class="QComboBox" name="configurationCB">
+        <item>
+         <property name="text">
+          <string>Select Configuration...</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetNoConstraint</enum>
+      </property>
+      <item>
        <widget class="oneCamera" name="cameraOne" native="true"/>
       </item>
-      <item row="0" column="0" alignment="Qt::AlignTop">
-       <widget class="QComboBox" name="comboBox">
-        <item>
-         <property name="text">
-          <string>Driving Mode</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-       </widget>
+      <item>
+       <widget class="oneCamera" name="cameraTwo" native="true"/>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="comboBox_2">
-        <item>
-         <property name="text">
-          <string>Configuration Mode</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>New Item</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0" alignment="Qt::AlignHCenter">
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetNoConstraint</enum>
+      </property>
+      <item>
        <widget class="oneCamera" name="cameraThree" native="true"/>
       </item>
-      <item row="2" column="1" alignment="Qt::AlignHCenter">
+      <item>
        <widget class="oneCamera" name="cameraFour" native="true"/>
       </item>
      </layout>

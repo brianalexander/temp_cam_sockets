@@ -6,6 +6,7 @@
 #include "../socketfunctions.hpp"
 
 #include <QThread>
+#include <map>
 
 class TcpListenerThread : public QThread
 {
@@ -19,13 +20,16 @@ public:
         m_id = id;
     }
     void sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint8_t numPacks);
+    void sendHeartbeat();
 
 signals:
     void deviceConnected(QString cameraId, int socketFd);
+    void deviceDisconnected(QString cameraId, int socketFd);
 
 private:
     const char* m_port;
     int m_id;
+    std::map<QString, int> connectedDevices;
 };
 
 #endif // TCPLISTENERTHREAD_H

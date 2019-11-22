@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW-
+#ifndef MAINWINDOW
 #define MAINWINDOW
 
 #include <QMainWindow>
@@ -16,7 +16,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void addDevice(QString cameraId, int fd);
+    void removeDevice(QString cameraId);
+
 public:
     Ui::MainWindow *ui;
+
 };
 #endif // MAINWINDOW

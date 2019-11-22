@@ -1,25 +1,3 @@
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h> // for memset
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-// #include <signal.h>
-
-// Data structures
-#include <vector>
-#include <set>
-#include <map>
-
-// Thread management
-#include <thread>
-#include <chrono>
-
 // OpenCV
 #include "opencv2/opencv.hpp"
 
@@ -50,10 +28,15 @@ int main(int argc, char *argv[])
     portListener1.setId(1);
     portListener1.start();
 
-    MainWindow ui;
-    oneCamera* cameraOne = ui.findChild<oneCamera*>("cameraOne");
-    QObject::connect(&portListener1, &VideoListenerThread::frameCompleted, cameraOne, &oneCamera::drawFrame);
+    MainWindow mainWindow;
 
-    ui.show();
+    oneCamera* cameraOne = mainWindow.findChild<oneCamera*>("cameraOne");
+    oneCamera* cameraTwo = mainWindow.findChild<oneCamera*>("cameraTwo");
+    oneCamera* cameraThree = mainWindow.findChild<oneCamera*>("cameraThree");
+    oneCamera* cameraFour = mainWindow.findChild<oneCamera*>("cameraFour");
+
+    QObject::connect(&portListener1, &VideoListenerThread::frameCompleted, cameraOne, &oneCamera::drawFrame);
+    QObject::connect(&tcpListener, &TcpListenerThread::deviceConnected, &mainWindow, &MainWindow::addDevice);
+    mainWindow.show();
     return a.exec();
 }
