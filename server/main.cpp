@@ -23,9 +23,6 @@
 // OpenCV
 #include "opencv2/opencv.hpp"
 
-// JSON
-#include "json.hpp"
-
 #include "uicamera.h"
 #include "onecamera.h"
 

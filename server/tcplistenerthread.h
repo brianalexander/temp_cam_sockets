@@ -2,8 +2,8 @@
 #define TCPLISTENERTHREAD_H
 
 // Networking
-#include "packetdefinitions.hpp"
-#include "socketfunctions.hpp"
+#include "../packetdefinitions.hpp"
+#include "../socketfunctions.hpp"
 
 #include <QThread>
 

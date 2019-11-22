@@ -1,7 +1,6 @@
 #include "tcplistenerthread.h"
 
 // Configuration
-#include "json.hpp"
 #include <iostream>
 #include <fstream>
 #include <QFile>
@@ -11,8 +10,8 @@
 #include <QDebug>
 
 // Networking
-#include "packetdefinitions.hpp"
-#include "socketfunctions.hpp"
+#include "../packetdefinitions.hpp"
+#include "../socketfunctions.hpp"
 
 void TcpListenerThread::run()
 {
@@ -59,7 +58,7 @@ void TcpListenerThread::run()
 
         if (recv_bytes == CONN_PACK_SIZE)
         {
-            std::cout << connPack.cameraId << " has connected." << std::endl;
+            qDebug() << connPack.cameraId << " has connected.";
             ConfigurationPacket defaultConfigPacket = {
                 configJSON["device"].toString().toStdString(),
                 configJSON["targetPort"].toString().toStdString(),

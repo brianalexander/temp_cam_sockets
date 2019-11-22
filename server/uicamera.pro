@@ -18,8 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     onecamera.cpp \
-    packetdefinitions.cpp \
-    socketfunctions.cpp \
+    ../packetdefinitions.cpp \
+    ../socketfunctions.cpp \
     tcplistenerthread.cpp \
     videolistenerthread.cpp \
     uicamera.cpp \
@@ -27,8 +27,8 @@ SOURCES += \
 
 HEADERS += \
     json.hpp \
-    packetdefinitions.hpp \
-    socketfunctions.hpp \
+    ../packetdefinitions.hpp \
+    ../socketfunctions.hpp \
     onecamera.h \
     tcplistenerthread.h \
     videolistenerthread.h \

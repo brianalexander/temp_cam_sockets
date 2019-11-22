@@ -31,8 +31,8 @@
 #include "json.hpp"
 
 // Networking
-#include "packetdefinitions.hpp"
-#include "socketfunctions.hpp"
+#include "../packetdefinitions.hpp"
+#include "../socketfunctions.hpp"
 
 std::set<int> socketFds;
 std::map<int, std::thread> socketToThreadMap;

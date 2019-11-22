@@ -11,8 +11,8 @@
 #include <arpa/inet.h>
 
 // Networking
-#include "packetdefinitions.hpp"
-#include "socketfunctions.hpp"
+#include "../packetdefinitions.hpp"
+#include "../socketfunctions.hpp"
 
 // OpenCV
 #include "opencv2/opencv.hpp"

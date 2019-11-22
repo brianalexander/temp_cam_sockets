@@ -12,8 +12,8 @@
 #include <cmath>
 
 #include "opencv2/opencv.hpp"
-#include "packetdefinitions.hpp"
-#include "socketfunctions.hpp"
+#include "../packetdefinitions.hpp"
+#include "../socketfunctions.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
