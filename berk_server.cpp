@@ -57,7 +57,8 @@ int main(void)
     // close file stream
     i.close();
 
-    for(int i = 0, port = 23456; i < videoStreamListeners.size(); port++, i++) {
+    for (int i = 0, port = 23456; i < videoStreamListeners.size(); port++, i++)
+    {
         videoStreamListeners[i] = std::thread(videoStreamListener, std::to_string(port), i);
     }
 
@@ -68,7 +69,7 @@ int main(void)
     return 0;
 }
 
-void sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint16_t numPacks)
+void sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint8_t numPacks)
 {
     int result;
     std::cout << "sending configuration..." << std::endl;
@@ -79,7 +80,7 @@ void sendConfiguration(int socketFd, uint8_t *configurationBuffer, uint16_t numP
         perror("send");
     }
 
-    std::cout << numPacks << std::endl;
+    printf("%hhu\n", numPacks);
     result = send(socketFd, configurationBuffer, numPacks, MSG_NOSIGNAL);
     if (result == -1)
     {
@@ -130,9 +131,9 @@ void tcpConnectionListener(char const *port)
                 configJSON["devices"][connPack.cameraId]["resolutionY"].get<uint16_t>(),
             };
 
-            idToSocketMap[std::string(connPack.cameraId)] =  new_fd;
+            idToSocketMap[std::string(connPack.cameraId)] = new_fd;
 
-            uint16_t numPacks;
+            uint8_t numPacks;
             uint8_t *serializedConfigPack = ConfigurationPacket::serialize(defaultConfigPacket, numPacks);
 
             sendConfiguration(new_fd, serializedConfigPack, numPacks);

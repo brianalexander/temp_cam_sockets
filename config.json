@@ -2,7 +2,7 @@
     "connPort": "12345",
     "devices": {
       "camera1": {
-        "device": "2",
+        "device": "0",
         "fps": 30,
         "quality": 25,
         "resolutionX": 1280,
