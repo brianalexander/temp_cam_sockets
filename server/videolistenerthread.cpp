@@ -32,8 +32,8 @@ void VideoListenerThread::run()
     const int buflen = 200000;
     unsigned char *buffer = new unsigned char[buflen];
 
-    udpSock = bindUdpSocketFd(m_port);
-    qDebug() << "Listening for video on UDP port " << m_port;
+    udpSock = bindUdpSocketFd(m_port.c_str());
+    qDebug() << "Listening for video on UDP port " << m_port.c_str();
 
     while (true)
     {

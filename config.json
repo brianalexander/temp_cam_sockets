@@ -1,5 +1,11 @@
 {
     "connPort": "12345",
+    "configurations": {
+      "driving": ["camera1", "camera2", "camera3", "camera4"],
+      "science": ["camera1", "camera2", "camera3", "camera4"],
+      "other": ["camera1", "camera2", "camera3", "camera4"],
+      "other1": ["camera1", "camera2", "camera3", "camera4"]
+    },
     "devices": {
       "camera1": {
         "device": "0",
@@ -7,25 +13,30 @@
         "quality": 25,
         "resolutionX": 1280,
         "resolutionY": 720,
-        "targetPort": "23456",
         "paused": false
       },
       "camera2": {
-        "device": "rtmp://fms.105.net:1935/live/rmc1",
+        "device": "2",
         "fps": 30,
-        "quality": 50,
-        "resolutionX": 1920,
-        "resolutionY": 1080,
-        "targetPort": "23457",
+        "quality": 25,
+        "resolutionX": 1280,
+        "resolutionY": 720,
         "paused": false
       },
       "camera3": {
-        "device": "rtmp://fms.105.net:1935/live/rmc1",
+        "device": "4",
         "fps": 30,
-        "quality": 50,
-        "resolutionX": 1920,
-        "resolutionY": 1080,
-        "targetPort": "23458",
+        "quality": 25,
+        "resolutionX": 1280,
+        "resolutionY": 720,
+        "paused": false
+      },
+      "camera4": {
+        "device": "6",
+        "fps": 30,
+        "quality": 25,
+        "resolutionX": 1280,
+        "resolutionY": 720,
         "paused": false
       }
     }

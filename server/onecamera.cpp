@@ -10,7 +10,6 @@ oneCamera::oneCamera(QWidget *parent) :
     ui(new Ui::oneCamera)
 {
     ui->setupUi(this);
-//    ui->cameraPic->setStyleSheet("QLabel { background-color : red; color : blue; }");
 }
 
 oneCamera::~oneCamera()
@@ -41,6 +40,4 @@ void oneCamera::drawFrame(cv::Mat frame){
                     ui->cameraPic->size(),
                     Qt::KeepAspectRatio,
                     Qt::SmoothTransformation));
-
-//    ui->videoFrame->setPixmap(QPixmap::fromImage(img));
 }

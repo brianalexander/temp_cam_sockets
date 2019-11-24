@@ -9,9 +9,27 @@
 #include <QJsonArray>
 #include <QDebug>
 
+#include "global.h"
+
 // Networking
 #include "../packetdefinitions.hpp"
 #include "../socketfunctions.hpp"
+
+void TcpListenerThread::sendHeartbeat() {
+    int result;
+    int numPacks = 2;
+    char *heartbeat = new char[numPacks];
+    heartbeat[0] = '%';
+    heartbeat[1] = '%';
+
+    for(auto it = connectedDevices.begin(); it != connectedDevices.end(); it++) {
+        result = send(it->second, &heartbeat, numPacks, MSG_NOSIGNAL);
+        qDebug() << "sending heartbeat to " << it->first;
+        if(result == 0 || result == -1) {
+            emit deviceDisconnected(it->first, it->second);
+        }
+    }
+}
 
 void TcpListenerThread::run()
 {
@@ -23,7 +41,7 @@ void TcpListenerThread::run()
 
     ConnectionPacket connPack;
 
-    sockfd = bindTcpSocketFd(m_port);
+    sockfd = bindTcpSocketFd(m_port.c_str());
     qDebug() << "server: waiting for connections...";
 
     for (;;)
@@ -58,28 +76,14 @@ void TcpListenerThread::run()
     }
 }
 
-void TcpListenerThread::sendConfiguration(const QString& cameraId)
+void TcpListenerThread::sendConfiguration(const QString& cameraId, ConfigurationPacket confPack)
 {
-    // Get handle for config file
-    QFile jsonFile("/home/alexanderb/Downloads/temp_cam_sockets/config.json");
-    // Read data into json object
-    jsonFile.open(QFile::ReadOnly);
-    // close file stream
-    QJsonDocument jsonResponse = QJsonDocument::fromJson(jsonFile.readAll());
-    QJsonObject configObject = jsonResponse.object();
-    QJsonObject configJSON = configObject["devices"].toObject()[cameraId].toObject();
-
-    ConfigurationPacket defaultConfigPacket = {
-        configJSON["device"].toString().toStdString(),
-        configJSON["targetPort"].toString().toStdString(),
-        configJSON["fps"].toInt(),
-        configJSON["quality"].toInt(),
-        configJSON["resolutionX"].toInt(),
-        configJSON["resolutionY"].toInt(),
-    };
+    if(connectedDevices.find(cameraId) == connectedDevices.end()) {
+        return;
+    }
 
     uint8_t numPacks;
-    uint8_t *serializedConfigPack = ConfigurationPacket::serialize(defaultConfigPacket, numPacks);
+    uint8_t *serializedConfigPack = ConfigurationPacket::serialize(confPack, numPacks);
 
     int result;
     qDebug() << "sending configuration...";
@@ -88,6 +92,7 @@ void TcpListenerThread::sendConfiguration(const QString& cameraId)
     if (result == -1)
     {
         perror("send");
+        emit deviceDisconnected(cameraId, connectedDevices[cameraId]);
     }
 
     printf("%hhu\n", numPacks);
@@ -95,6 +100,7 @@ void TcpListenerThread::sendConfiguration(const QString& cameraId)
     if (result == -1)
     {
         perror("send");
+        emit deviceDisconnected(cameraId, connectedDevices[cameraId]);
     }
 
     delete serializedConfigPack;

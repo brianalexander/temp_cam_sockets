@@ -15,8 +15,11 @@ class VideoListenerThread : public QThread
     Q_OBJECT
 public:
     void run(void);
-    void setPort(const char* port) {
-        m_port = port;
+    const char* getPort() {
+        return m_port.c_str();
+    }
+    void setPort(int port) {
+        m_port = QString::number(port).toStdString();
     }
     void setId(int id) {
         m_id = id;
@@ -25,7 +28,7 @@ public:
 signals:
     void frameCompleted(cv::Mat frame);
 private:
-    const char* m_port;
+    std::string m_port;
     int m_id;
 };
 

@@ -1,6 +1,6 @@
 /*
  * client.c -- a stream socket client demo
- * g++ berk_client.cpp packetdefinitions.cpp socketfunctions.cpp -o berkcli -lpthread `pkg-config --cflags --libs opencv`
+ * g++ berk_client.cpp ../packetdefinitions.cpp ../socketfunctions.cpp -o berkcli -lpthread `pkg-config --cflags --libs opencv`
  */
 
 #include <chrono>
@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
     }
 
     g_hostIp = argv[2];
-
 
     //setup random number generator for exponential backoff
     std::random_device rd;
@@ -158,6 +157,11 @@ void tcpListener(int tcpSockFd)
                 return;
             }
 
+            while (tempBuf[tempIndex] == '%')
+            {
+                tempIndex++;
+            }
+
             std::cout << "received " << recv_bytes << " bytes" << std::endl;
 
             // If starting a new message
@@ -204,6 +208,9 @@ void tcpListener(int tcpSockFd)
         // make sure we are in the correct state to accept a new configuration
         if (haveNewConfig == false)
         {
+            haveNewConfig = true;
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
             currentConfig = ConfigurationPacket::deserialize(buf);
             std::cout << "deserialize " << currentConfig.targetPort << std::endl;
             printf("new configuration: device: %s port: %s FPS:%hhu QUAL:%hhu X:%hu Y:%hu\n",
@@ -306,7 +313,7 @@ void videoStreamWriter()
                 break;
             }
 
-            if (!g_connected)
+            if (!g_connected || haveNewConfig)
             {
                 close(udpSockFd);
                 vidCap.release();
@@ -317,9 +324,10 @@ void videoStreamWriter()
             std::this_thread::sleep_for(std::chrono::milliseconds(1000 / currentConfig.fps));
         }
 
-        if (!g_connected)
+        if (!g_connected || haveNewConfig)
         {
             break;
         }
     }
+    std::cout << "stopping stream" << std::endl;
 }
