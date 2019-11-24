@@ -1,7 +1,7 @@
 #include "onecamera.h"
 #include "ui_onecamera.h"
 
-
+#include <QPushButton>
 #include <QDebug>
 
 
@@ -10,6 +10,9 @@ oneCamera::oneCamera(QWidget *parent) :
     ui(new Ui::oneCamera)
 {
     ui->setupUi(this);
+    QPushButton* popupButton = ui->popNewScreenButton;
+
+    QObject::connect(popupButton, &QPushButton::clicked, this, &oneCamera::createWindow);
 }
 
 oneCamera::~oneCamera()
@@ -17,12 +20,10 @@ oneCamera::~oneCamera()
     delete ui;
 }
 
-
-void oneCamera::resizeEvent(QResizeEvent *event) {
-//    ui->cameraPic->resize(640,480);
-//    ui->cameraPic->setPixmap(myPixmap.scaled(event->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-//    this->pixmap()->scaled(event->size(), Qt::KeepAspectRatio);
-//    qDebug() << event->size().height();
+void oneCamera::createWindow(){
+    oneCamera* popup = new oneCamera();
+    popup->listenTo(this->getVideoProvider());
+    popup->show();
 }
 
 void oneCamera::drawFrame(cv::Mat frame){

@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QStandardItem>
 #include <QStandardItemModel>
+#include <QPushButton>
 #include "videolistenerthread.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -22,19 +23,21 @@ MainWindow::MainWindow(QWidget *parent)
     tcpListener->start();
 
     videoListenerThreads = new std::vector<VideoListenerThread*>();
+    cameras = new std::vector<oneCamera*>{
+            ui->cameraOne,
+            ui->cameraTwo,
+            ui->cameraThree,
+            ui->cameraFour
+    };
 
     for(int i = 0; i < 4; i++) {
         VideoListenerThread *videoListener = new VideoListenerThread();
         videoListener->setPort(23456+i);
         videoListener->setId(i);
         videoListener->start();
+        cameras->at(i)->listenTo(videoListener);
         videoListenerThreads->push_back(videoListener);
     }
-
-    oneCamera* cameraOne = ui->cameraOne;
-    oneCamera* cameraTwo = ui->cameraTwo;
-    oneCamera* cameraThree = ui->cameraThree;
-    oneCamera* cameraFour = ui->cameraFour;
 
     QComboBox* singleCameraComboBox = ui->singleCameraCB;
     QComboBox* configurationComboBox = ui->configurationCB;
@@ -53,19 +56,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(tcpListener, &TcpListenerThread::deviceConnected, this, &MainWindow::addDevice);
     QObject::connect(tcpListener, &TcpListenerThread::deviceDisconnected, this, &MainWindow::removeDevice);
-    QObject::connect(singleCameraComboBox, QOverload<const QString&>::of(&QComboBox::activated), this, &MainWindow::buildOneConfiguration);
-    QObject::connect(configurationComboBox, QOverload<const QString&>::of(&QComboBox::activated), this, &MainWindow::buildConfigurations);
+    QObject::connect(singleCameraComboBox, QOverload<const QString&>::of(&QComboBox::activated), this, &MainWindow::setCamera);
+    QObject::connect(configurationComboBox, QOverload<const QString&>::of(&QComboBox::activated), this, &MainWindow::setConfiguration);
 
     QObject::connect(this, &MainWindow::forwardConfiguration, tcpListener, &TcpListenerThread::sendConfiguration);
-
-    QObject::connect(videoListenerThreads->at(0), &VideoListenerThread::frameCompleted, cameraOne, &oneCamera::drawFrame);
-    QObject::connect(videoListenerThreads->at(1), &VideoListenerThread::frameCompleted, cameraTwo, &oneCamera::drawFrame);
-    QObject::connect(videoListenerThreads->at(2), &VideoListenerThread::frameCompleted, cameraThree, &oneCamera::drawFrame);
-    QObject::connect(videoListenerThreads->at(3), &VideoListenerThread::frameCompleted, cameraFour, &oneCamera::drawFrame);
-
 }
 
-void MainWindow::buildConfigurations(const QString& configurationId) {
+void MainWindow::setConfiguration(const QString& configurationId) {
     QJsonObject configurationList = global::configObject["configurations"].toObject();
     QJsonArray cameraList = configurationList[configurationId].toArray();
 
@@ -74,7 +71,7 @@ void MainWindow::buildConfigurations(const QString& configurationId) {
     }
 }
 
-void MainWindow::buildOneConfiguration(const QString& cameraId) {
+void MainWindow::setCamera(const QString& cameraId) {
     buildConfiguration(cameraId, 0);
 }
 

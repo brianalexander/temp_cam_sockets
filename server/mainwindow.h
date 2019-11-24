@@ -28,12 +28,13 @@ signals:
 public slots:
     void addDevice(QString cameraId, int fd);
     void removeDevice(QString cameraId, int fd);
-    void buildOneConfiguration(const QString& cameraId);
-    void buildConfigurations(const QString& configurationId);
+    void setCamera(const QString& cameraId);
+    void setConfiguration(const QString& configurationId);
 
 private:
     Ui::MainWindow *ui;
     std::vector<VideoListenerThread*> *videoListenerThreads;
+    std::vector<oneCamera*> *cameras;
     TcpListenerThread *tcpListener;
 };
 #endif // MAINWINDOW
