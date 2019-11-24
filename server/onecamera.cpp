@@ -10,9 +10,18 @@ oneCamera::oneCamera(QWidget *parent) :
     ui(new Ui::oneCamera)
 {
     ui->setupUi(this);
-    QPushButton* popupButton = ui->popNewScreenButton;
 
-    QObject::connect(popupButton, &QPushButton::clicked, this, &oneCamera::createWindow);
+    QRadioButton* qualityLowButton = ui->lowQualityButton;
+    qualityLowButton->setChecked(true);
+    QRadioButton* qualityMediumButton = ui->mediumQualityButton;
+    QRadioButton* qualityHighButton = ui->highQualityButton;
+
+    QObject::connect(qualityLowButton, &QRadioButton::clicked, this, &oneCamera::qualityButtonClicked);
+    QObject::connect(qualityMediumButton, &QRadioButton::clicked, this, &oneCamera::qualityButtonClicked);
+    QObject::connect(qualityHighButton, &QRadioButton::clicked, this, &oneCamera::qualityButtonClicked);
+
+    QPushButton* popupButton = ui->popNewScreenButton;
+    QObject::connect(popupButton, &QPushButton::clicked, this, &oneCamera::popupButtonClicked);
 }
 
 oneCamera::~oneCamera()
@@ -20,10 +29,21 @@ oneCamera::~oneCamera()
     delete ui;
 }
 
-void oneCamera::createWindow(){
-    oneCamera* popup = new oneCamera();
-    popup->listenTo(this->getVideoProvider());
-    popup->show();
+void oneCamera::popupButtonClicked() {
+    emit requestPopup(m_id);
+}
+
+void oneCamera::qualityButtonClicked() {
+    int quality;
+    if(ui->lowQualityButton->isChecked()) {
+        quality = 0;
+    } else if(ui->mediumQualityButton->isChecked()) {
+        quality = 1;
+    } else if (ui->highQualityButton->isChecked()) {
+        quality = 2;
+    }
+
+    emit qualityChanged(m_id, m_currentCamera, quality);
 }
 
 void oneCamera::drawFrame(cv::Mat frame){

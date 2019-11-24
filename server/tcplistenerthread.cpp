@@ -76,7 +76,7 @@ void TcpListenerThread::run()
     }
 }
 
-void TcpListenerThread::sendConfiguration(const QString& cameraId, ConfigurationPacket confPack)
+void TcpListenerThread::sendConfiguration(const QString cameraId, ConfigurationPacket confPack)
 {
     if(connectedDevices.find(cameraId) == connectedDevices.end()) {
         return;

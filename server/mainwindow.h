@@ -18,18 +18,20 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    void buildConfiguration(const QString& cameraId, int index);
+    void buildConfiguration(const QString cameraId, int index);
 
     ~MainWindow();
 
 signals:
-    void forwardConfiguration(const QString& cameraId, ConfigurationPacket confPack);
+    void configurationReady(const QString cameraId, ConfigurationPacket confPack);
 
 public slots:
     void addDevice(QString cameraId, int fd);
     void removeDevice(QString cameraId, int fd);
-    void setCamera(const QString& cameraId);
-    void setConfiguration(const QString& configurationId);
+    void setCamera(const QString cameraId);
+    void setConfiguration(const QString configurationId);
+    void createPopupWindow(int videoListenerIndex);
+    void getConfiguration(int viewIndex, QString cameraId, int quality);
 
 private:
     Ui::MainWindow *ui;

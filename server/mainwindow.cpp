@@ -22,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     tcpListener->setId(1);
     tcpListener->start();
 
+    QObject::connect(tcpListener, &TcpListenerThread::deviceConnected, this, &MainWindow::addDevice);
+    QObject::connect(tcpListener, &TcpListenerThread::deviceDisconnected, this, &MainWindow::removeDevice);
+
     videoListenerThreads = new std::vector<VideoListenerThread*>();
     cameras = new std::vector<oneCamera*>{
             ui->cameraOne,
@@ -35,8 +38,11 @@ MainWindow::MainWindow(QWidget *parent)
         videoListener->setPort(23456+i);
         videoListener->setId(i);
         videoListener->start();
-        cameras->at(i)->listenTo(videoListener);
         videoListenerThreads->push_back(videoListener);
+        cameras->at(i)->setViewIndex(i);
+        QObject::connect(cameras->at(i), &oneCamera::requestPopup, this, &MainWindow::createPopupWindow);
+        QObject::connect(cameras->at(i), &oneCamera::qualityChanged, this, &MainWindow::getConfiguration);
+        QObject::connect(videoListener, &VideoListenerThread::frameCompleted, cameras->at(i), &oneCamera::drawFrame);
     }
 
     QComboBox* singleCameraComboBox = ui->singleCameraCB;
@@ -54,15 +60,24 @@ MainWindow::MainWindow(QWidget *parent)
     QJsonObject configurationList = global::configObject["configurations"].toObject();
     configurationComboBox->addItems(configurationList.keys());
 
-    QObject::connect(tcpListener, &TcpListenerThread::deviceConnected, this, &MainWindow::addDevice);
-    QObject::connect(tcpListener, &TcpListenerThread::deviceDisconnected, this, &MainWindow::removeDevice);
     QObject::connect(singleCameraComboBox, QOverload<const QString&>::of(&QComboBox::activated), this, &MainWindow::setCamera);
     QObject::connect(configurationComboBox, QOverload<const QString&>::of(&QComboBox::activated), this, &MainWindow::setConfiguration);
 
-    QObject::connect(this, &MainWindow::forwardConfiguration, tcpListener, &TcpListenerThread::sendConfiguration);
+    QObject::connect(this, &MainWindow::configurationReady, tcpListener, &TcpListenerThread::sendConfiguration);
+
 }
 
-void MainWindow::setConfiguration(const QString& configurationId) {
+void MainWindow::getConfiguration(int viewIndex, QString cameraId, int quality) {
+    buildConfiguration(cameraId, viewIndex);
+}
+
+void MainWindow::createPopupWindow(int videoListenerIndex) {
+    oneCamera* popup = new oneCamera();
+    QObject::connect(videoListenerThreads->at(videoListenerIndex), &VideoListenerThread::frameCompleted, popup, &oneCamera::drawFrame);
+    popup->show();
+}
+
+void MainWindow::setConfiguration(const QString configurationId) {
     QJsonObject configurationList = global::configObject["configurations"].toObject();
     QJsonArray cameraList = configurationList[configurationId].toArray();
 
@@ -71,11 +86,13 @@ void MainWindow::setConfiguration(const QString& configurationId) {
     }
 }
 
-void MainWindow::setCamera(const QString& cameraId) {
+void MainWindow::setCamera(const QString cameraId) {
     buildConfiguration(cameraId, 0);
 }
 
-void MainWindow::buildConfiguration(const QString& cameraId, int index) {
+void MainWindow::buildConfiguration(const QString cameraId, int index) {
+    cameras->at(index)->setCameraId(cameraId);
+
     QJsonObject deviceJSON = global::configObject["devices"]
             .toObject()[cameraId]
             .toObject();
@@ -89,7 +106,7 @@ void MainWindow::buildConfiguration(const QString& cameraId, int index) {
         static_cast<u_int16_t>(deviceJSON["resolutionY"].toInt()),
     };
 
-    emit forwardConfiguration(cameraId, confPack);
+    emit configurationReady(cameraId, confPack);
 }
 
 void MainWindow::addDevice(QString cameraId, int fd) {

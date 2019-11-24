@@ -7,6 +7,7 @@
 // OpenCV
 #include "opencv2/opencv.hpp"
 #include "videolistenerthread.h"
+#include "../packetdefinitions.hpp"
 
 namespace Ui {
 class oneCamera;
@@ -19,26 +20,30 @@ class oneCamera : public QWidget
 public:
     explicit oneCamera(QWidget *parent = nullptr);
 
-    void listenTo(VideoListenerThread* vidList) {
-        videoListener = vidList;
-
-        QObject::connect(videoListener, &VideoListenerThread::frameCompleted, this, &oneCamera::drawFrame);
+    void setViewIndex(int id) {
+        m_id = id;
     }
 
-    VideoListenerThread* getVideoProvider() {
-        return videoListener;
+    void setCameraId(QString cameraId) {
+        m_currentCamera = cameraId;
     }
 
     ~oneCamera();
 
+signals:
+    void requestPopup(int videoListenerIndex);
+    void qualityChanged(int viewIndex, QString cameraId, int quality);
+
 public slots:
     void drawFrame(cv::Mat frame);
-    void createWindow();
+    void popupButtonClicked();
+    void qualityButtonClicked();
 
 private:
     Ui::oneCamera *ui;
     QPixmap myPixmap;
-    VideoListenerThread* videoListener;
+    int m_id;
+    QString m_currentCamera;
 };
 
 #endif // ONECAMERA_H

@@ -21,7 +21,7 @@ public:
     }
 
 public slots:
-    void sendConfiguration(const QString& cameraId, ConfigurationPacket confPack);
+    void sendConfiguration(const QString cameraId, ConfigurationPacket confPack);
     void sendHeartbeat();
 
 signals:
