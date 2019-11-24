@@ -1,10 +1,6 @@
 #ifndef VIDEOLISTENERTHREAD_H
 #define VIDEOLISTENERTHREAD_H
 
-// Networking
-#include "../packetdefinitions.hpp"
-#include "../socketfunctions.hpp"
-
 #include <QThread>
 
 // OpenCV
