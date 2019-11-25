@@ -42,11 +42,15 @@ public:
 
 signals:
     void requestPopup(int videoListenerIndex);
+    void requestPause(const QString cameraId);
     void qualityChanged(int viewIndex, QString cameraId, int quality);
 
 public slots:
     void drawFrame(cv::Mat frame);
+
+private slots:
     void popupButtonClicked();
+    void pauseButtonClicked();
     void qualityButtonClicked();
 
 private:

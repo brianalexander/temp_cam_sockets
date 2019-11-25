@@ -15,18 +15,6 @@
 #include "../packetdefinitions.hpp"
 #include "../socketfunctions.hpp"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <netdb.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-
-#include <arpa/inet.h>
-
 #define MAXIMUM_BACKOFF 32000
 
 // function declarations
@@ -41,6 +29,10 @@ char *g_hostIp;
 std::mutex m_connected;
 std::condition_variable condVar_connected;
 bool g_connected = false;
+
+std::mutex m_paused;
+std::condition_variable condVar_paused;
+bool g_paused = false;
 
 // vars for thread synchronization
 std::mutex m_configuration;
@@ -130,14 +122,16 @@ void tcpListener(int tcpSockFd)
     const int buflen = 2000000;
     uint8_t buf[buflen];
     uint8_t tempBuf[buflen];
+    bool messageComplete = false;
 
     for (;;) // infinite loop
     {
         std::cout << "waiting for new configuration" << std::endl;
         // get the incoming configuration data
-        do
+        while (!messageComplete)
         {
             // get the incoming bytes
+            std::cout << "tempIndex = " << tempIndex << std::endl;
             recv_bytes = recv(tcpSockFd, &tempBuf[tempIndex], PACK_SIZE, 0);
             if (recv_bytes == -1 || recv_bytes == 0)
             {
@@ -157,9 +151,19 @@ void tcpListener(int tcpSockFd)
                 return;
             }
 
-            while (tempBuf[tempIndex] == '%')
+            if (tempBuf[tempIndex] == '%' && tempBuf[tempIndex + 1] == '%')
             {
-                tempIndex++;
+                tempIndex = tempIndex + 2;
+
+                {
+                    std::lock_guard<std::mutex> lk(m_paused);
+                    g_paused = !g_paused;
+                }
+
+                condVar_paused.notify_all();
+
+                std::cout << "toggling g_paused: " << g_paused << std::endl;
+                continue;
             }
 
             std::cout << "received " << recv_bytes << " bytes" << std::endl;
@@ -203,11 +207,18 @@ void tcpListener(int tcpSockFd)
             memcpy(tempBuf, &tempBuf[tempIndex], recv_bytes - bytesToCopy);
             tempIndex = recv_bytes - bytesToCopy;
             remainingBytes = remainingBytes - bytesToCopy;
-        } while (remainingBytes > 0);
+
+            if (remainingBytes == 0)
+            {
+                messageComplete = true;
+            }
+        }
+        // tempIndex = 0;
 
         // make sure we are in the correct state to accept a new configuration
         if (haveNewConfig == false)
         {
+            messageComplete =  false;
             haveNewConfig = true;
             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
@@ -274,6 +285,12 @@ void videoStreamWriter()
         // main loop for broadcasting frames
         for (;;)
         {
+            {
+                // Wait until we lose our connection
+                std::unique_lock<std::mutex> lk(m_paused);
+                condVar_paused.wait(lk, [] { return !g_paused; });
+            }
+
             bytesPerFrame = 0;
             // std::cout << "streamingloop" << std::endl;
             // get a video frame from the camera

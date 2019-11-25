@@ -22,11 +22,18 @@ oneCamera::oneCamera(QWidget *parent) :
 
     QPushButton* popupButton = ui->popNewScreenButton;
     QObject::connect(popupButton, &QPushButton::clicked, this, &oneCamera::popupButtonClicked);
+
+    QPushButton* pauseButton = ui->pauseButton;
+    QObject::connect(pauseButton, &QPushButton::clicked, this, &oneCamera::pauseButtonClicked);
 }
 
 oneCamera::~oneCamera()
 {
     delete ui;
+}
+
+void oneCamera::pauseButtonClicked(){
+    emit requestPause(m_currentCamera);
 }
 
 void oneCamera::isPopup() {
@@ -56,7 +63,7 @@ void oneCamera::qualityButtonClicked() {
 }
 
 void oneCamera::drawFrame(cv::Mat frame){
-    qDebug() << frame.cols << " " << frame.rows;
+//    qDebug() << frame.cols << " " << frame.rows;
     // Set the color table (used to translate colour indexes to qRgb values)
     QVector<QRgb> colorTable;
     for (int i=0; i<256; i++)

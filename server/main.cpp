@@ -1,19 +1,10 @@
-// OpenCV
-#include "opencv2/opencv.hpp"
-
+// Application Imports
 #include "mainwindow.h"
-#include "onecamera.h"
-#include "global.h"
-
-#include <QThread>
 #include <QApplication>
-#include <QDebug>
 
-// Thread Objects
-
-#include "tcplistenerthread.h"
+// Metatype imports
 #include "../packetdefinitions.hpp"
-
+#include "opencv2/opencv.hpp"
 
 Q_DECLARE_METATYPE(cv::Mat)
 Q_DECLARE_METATYPE(ConfigurationPacket)

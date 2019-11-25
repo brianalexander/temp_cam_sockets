@@ -9,8 +9,6 @@
 #include <QJsonArray>
 #include <QDebug>
 
-#include "global.h"
-
 // Networking
 #include "../packetdefinitions.hpp"
 #include "../socketfunctions.hpp"
@@ -73,6 +71,23 @@ void TcpListenerThread::run()
             connectedDevices[QString(connPack.cameraId)] = new_fd;
             emit deviceConnected(QString(connPack.cameraId), new_fd);
         }
+    }
+}
+
+void TcpListenerThread::sendPause(const QString cameraId) {
+    if(connectedDevices.find(cameraId) == connectedDevices.end()) {
+        return;
+    }
+
+    int result;
+    int numPacks = 2;
+    char *heartbeat = new char[numPacks];
+    heartbeat[0] = '%';
+    heartbeat[1] = '%';
+
+    result = send(connectedDevices[cameraId], heartbeat, numPacks, MSG_NOSIGNAL);
+    if(result == 0 || result == -1) {
+        emit deviceDisconnected(cameraId, connectedDevices[cameraId]);
     }
 }
 

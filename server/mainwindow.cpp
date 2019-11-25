@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
         cameras->at(i)->setViewIndex(i);
         QObject::connect(cameras->at(i), &oneCamera::requestPopup, this, &MainWindow::createPopupWindow);
         QObject::connect(cameras->at(i), &oneCamera::qualityChanged, this, &MainWindow::getConfiguration);
+        QObject::connect(cameras->at(i), &oneCamera::requestPause, tcpListener, &TcpListenerThread::sendPause);
         QObject::connect(videoListener, &VideoListenerThread::frameCompleted, cameras->at(i), &oneCamera::drawFrame);
     }
 
@@ -66,14 +67,18 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(this, &MainWindow::configurationReady, tcpListener, &TcpListenerThread::sendConfiguration);
 }
 
-void MainWindow::getConfiguration(int viewIndex, QString cameraId, int quality) {
-    buildConfiguration(cameraId, viewIndex, quality);
+void MainWindow::handlePause(int viewportIndex) {
+
 }
 
-void MainWindow::createPopupWindow(int videoListenerIndex) {
+void MainWindow::getConfiguration(int viewportIndex, QString cameraId, int quality) {
+    buildConfiguration(cameraId, viewportIndex, quality);
+}
+
+void MainWindow::createPopupWindow(int viewportIndex) {
     oneCamera* popup = new oneCamera();
     popup->isPopup();
-    QObject::connect(videoListenerThreads->at(videoListenerIndex), &VideoListenerThread::frameCompleted, popup, &oneCamera::drawFrame);
+    QObject::connect(videoListenerThreads->at(viewportIndex), &VideoListenerThread::frameCompleted, popup, &oneCamera::drawFrame);
     popup->show();
 }
 
@@ -90,8 +95,8 @@ void MainWindow::setCamera(const QString cameraId) {
     buildConfiguration(cameraId, 0, 0);
 }
 
-void MainWindow::buildConfiguration(const QString cameraId, int viewIndex, int quality) {
-    cameras->at(viewIndex)->setCameraId(cameraId);
+void MainWindow::buildConfiguration(const QString cameraId, int viewportIndex, int quality) {
+    cameras->at(viewportIndex)->setCameraId(cameraId);
 
     QJsonObject deviceJSON = global::configObject["devices"]
             .toObject()[cameraId]
@@ -103,11 +108,11 @@ void MainWindow::buildConfiguration(const QString cameraId, int viewIndex, int q
 
     ConfigurationPacket confPack = {
         deviceJSON["device"].toString().toStdString(),
-        QString(videoListenerThreads->at(viewIndex)->getPort()).toStdString(),
+        QString(videoListenerThreads->at(viewportIndex)->getPort()).toStdString(),
         static_cast<u_int8_t>(deviceQuality["fps"].toInt()),
         static_cast<u_int8_t>(deviceQuality["jpgQuality"].toInt()),
-        static_cast<u_int16_t>(deviceJSON["resolutionX"].toInt()),
-        static_cast<u_int16_t>(deviceJSON["resolutionY"].toInt()),
+        static_cast<u_int16_t>(deviceQuality["resolutionX"].toInt()),
+        static_cast<u_int16_t>(deviceQuality["resolutionY"].toInt()),
     };
 
     emit configurationReady(cameraId, confPack);

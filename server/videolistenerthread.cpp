@@ -63,7 +63,7 @@ void VideoListenerThread::run()
 
 
         // Draws the frame on screen. Will be replaced with UI code
-        qDebug() << "frame finished";
+//        qDebug() << "frame finished";
         emit frameCompleted(frame);
 
         std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();

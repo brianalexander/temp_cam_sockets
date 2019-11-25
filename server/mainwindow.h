@@ -32,6 +32,7 @@ public slots:
     void setConfiguration(const QString configurationId);
     void createPopupWindow(int videoListenerIndex);
     void getConfiguration(int viewIndex, QString cameraId, int quality);
+    void handlePause(int viewportIndex);
 
 private:
     Ui::MainWindow *ui;
