@@ -64,15 +64,15 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(configurationComboBox, QOverload<const QString&>::of(&QComboBox::activated), this, &MainWindow::setConfiguration);
 
     QObject::connect(this, &MainWindow::configurationReady, tcpListener, &TcpListenerThread::sendConfiguration);
-
 }
 
 void MainWindow::getConfiguration(int viewIndex, QString cameraId, int quality) {
-    buildConfiguration(cameraId, viewIndex);
+    buildConfiguration(cameraId, viewIndex, quality);
 }
 
 void MainWindow::createPopupWindow(int videoListenerIndex) {
     oneCamera* popup = new oneCamera();
+    popup->isPopup();
     QObject::connect(videoListenerThreads->at(videoListenerIndex), &VideoListenerThread::frameCompleted, popup, &oneCamera::drawFrame);
     popup->show();
 }
@@ -82,26 +82,30 @@ void MainWindow::setConfiguration(const QString configurationId) {
     QJsonArray cameraList = configurationList[configurationId].toArray();
 
     for(int i = 0; i < cameraList.size(); i++) {
-        buildConfiguration(cameraList[i].toString(), i);
+        buildConfiguration(cameraList[i].toString(), i, 0);
     }
 }
 
 void MainWindow::setCamera(const QString cameraId) {
-    buildConfiguration(cameraId, 0);
+    buildConfiguration(cameraId, 0, 0);
 }
 
-void MainWindow::buildConfiguration(const QString cameraId, int index) {
-    cameras->at(index)->setCameraId(cameraId);
+void MainWindow::buildConfiguration(const QString cameraId, int viewIndex, int quality) {
+    cameras->at(viewIndex)->setCameraId(cameraId);
 
     QJsonObject deviceJSON = global::configObject["devices"]
             .toObject()[cameraId]
             .toObject();
 
+    QJsonObject deviceQuality = deviceJSON["quality"]
+            .toArray()[quality]
+            .toObject();
+
     ConfigurationPacket confPack = {
         deviceJSON["device"].toString().toStdString(),
-        QString(videoListenerThreads->at(index)->getPort()).toStdString(),
-        static_cast<u_int8_t>(deviceJSON["fps"].toInt()),
-        static_cast<u_int8_t>(deviceJSON["quality"].toInt()),
+        QString(videoListenerThreads->at(viewIndex)->getPort()).toStdString(),
+        static_cast<u_int8_t>(deviceQuality["fps"].toInt()),
+        static_cast<u_int8_t>(deviceQuality["jpgQuality"].toInt()),
         static_cast<u_int16_t>(deviceJSON["resolutionX"].toInt()),
         static_cast<u_int16_t>(deviceJSON["resolutionY"].toInt()),
     };

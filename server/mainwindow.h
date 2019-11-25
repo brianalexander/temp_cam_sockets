@@ -18,7 +18,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    void buildConfiguration(const QString cameraId, int index);
+    void buildConfiguration(const QString cameraId, int viewIndex, int quality);
 
     ~MainWindow();
 

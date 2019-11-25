@@ -1,44 +1,107 @@
 {
-    "connPort": "12345",
-    "configurations": {
-      "driving": ["camera1", "camera2", "camera3", "camera4"],
-      "science": ["camera1", "camera2", "camera3", "camera4"],
-      "other": ["camera1", "camera2", "camera3", "camera4"],
-      "other1": ["camera1", "camera2", "camera3", "camera4"]
+  "connPort": "12345",
+  "configurations": {
+    "driving": ["camera1", "camera2", "camera3", "camera4"],
+    "science": ["camera1", "camera2", "camera3", "camera4"],
+    "other": ["camera1", "camera2", "camera3", "camera4"],
+    "other1": ["camera1", "camera2", "camera3", "camera4"]
+  },
+  "devices": {
+    "camera1": {
+      "device": "0",
+      "quality": [
+        {
+          "jpgQuality": 5,
+          "fps": 10,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        },
+        {
+          "jpgQuality": 15,
+          "fps": 20,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        },
+        {
+          "jpgQuality": 50,
+          "fps": 30,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        }
+      ],
+      "paused": false
     },
-    "devices": {
-      "camera1": {
-        "device": "0",
-        "fps": 30,
-        "quality": 25,
-        "resolutionX": 1280,
-        "resolutionY": 720,
-        "paused": false
-      },
-      "camera2": {
-        "device": "2",
-        "fps": 30,
-        "quality": 25,
-        "resolutionX": 1280,
-        "resolutionY": 720,
-        "paused": false
-      },
-      "camera3": {
-        "device": "4",
-        "fps": 30,
-        "quality": 25,
-        "resolutionX": 1280,
-        "resolutionY": 720,
-        "paused": false
-      },
-      "camera4": {
-        "device": "6",
-        "fps": 30,
-        "quality": 25,
-        "resolutionX": 1280,
-        "resolutionY": 720,
-        "paused": false
-      }
+    "camera2": {
+      "device": "2",
+      "quality": [
+        {
+          "jpgQuality": 5,
+          "fps": 10,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        },
+        {
+          "jpgQuality": 15,
+          "fps": 20,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        },
+        {
+          "jpgQuality": 35,
+          "fps": 30,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        }
+      ],
+      "paused": false
+    },
+    "camera3": {
+      "device": "4",
+      "quality": [
+        {
+          "jpgQuality": 5,
+          "fps": 10,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        },
+        {
+          "jpgQuality": 15,
+          "fps": 20,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        },
+        {
+          "jpgQuality": 35,
+          "fps": 30,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        }
+      ],
+      "paused": false
+    },
+    "camera4": {
+      "device": "0",
+      "quality": [
+        {
+          "jpgQuality": 5,
+          "fps": 10,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        },
+        {
+          "jpgQuality": 15,
+          "fps": 20,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        },
+        {
+          "jpgQuality": 35,
+          "fps": 30,
+          "resolutionX": 1280,
+          "resolutionY": 720
+        }
+      ],
+      "paused": false
     }
   }
-  
+}

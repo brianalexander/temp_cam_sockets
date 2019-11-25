@@ -20,12 +20,22 @@ class oneCamera : public QWidget
 public:
     explicit oneCamera(QWidget *parent = nullptr);
 
+    void isPopup();
+
     void setViewIndex(int id) {
         m_id = id;
     }
 
+    int getViewIndex() {
+       return m_id;
+    }
+
     void setCameraId(QString cameraId) {
         m_currentCamera = cameraId;
+    }
+
+    QString getCameraId() {
+        return m_currentCamera;
     }
 
     ~oneCamera();

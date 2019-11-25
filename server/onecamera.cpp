@@ -29,6 +29,15 @@ oneCamera::~oneCamera()
     delete ui;
 }
 
+void oneCamera::isPopup() {
+    delete ui->verticalLayout;
+    delete ui->highQualityButton;
+    delete ui->mediumQualityButton;
+    delete ui->pauseButton;
+    delete ui->popNewScreenButton;
+    delete ui->lowQualityButton;
+}
+
 void oneCamera::popupButtonClicked() {
     emit requestPopup(m_id);
 }
